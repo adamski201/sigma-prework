@@ -15,8 +15,22 @@ def print_greeting() -> None:
     print("Guess the word by entering a single character, or try to guess the entire word itself!")
 
 
-def ask_for_guess() -> None:
-    return input("Enter a single character to make a guess: ").lower()
+def ask_for_guess(guessed_chars) -> str:
+    while True:
+        guess = input(
+            "Enter a single character to make a guess: ").lower()
+
+        if not hangman.is_unique_guess(guess, guessed_chars):
+            print("You have already guessed this character. Please try again.")
+            time.sleep(1)
+            continue
+
+        if not hangman.is_valid_guess_input(guess):
+            print("Input not recognised. Please try again.")
+            time.sleep(1)
+            continue
+
+        return guess
 
 
 def play_hangman():
@@ -46,21 +60,7 @@ def play_hangman():
 
         print(f"Your current attempt: {curr_answer_line}")
 
-        # Validate input
-        while True:
-            curr_guess = ask_for_guess()
-
-            if not hangman.is_unique_guess(curr_guess, guessed_chars):
-                print("You have already guessed this character. Please try again.")
-                time.sleep(1)
-                continue
-
-            if not hangman.is_valid_guess_input(curr_guess):
-                print("Input not recognised. Please try again.")
-                time.sleep(1)
-                continue
-
-            break
+        curr_guess = ask_for_guess(guessed_chars)
 
         print(f"Attempting '{curr_guess}'...")
 
@@ -80,13 +80,15 @@ def play_hangman():
             mistakes += 1
 
         if hangman.is_won(curr_answer_line, answer):
-            time.sleep(0.5)
+            time.sleep(1.5)
             print("Well done, you've won!")
             break
 
         time.sleep(1.5)
 
         clear_console()
+
+    time.sleep(1)
 
     play_again_input = input("Would you like to play again? (y/n): ").lower()
 

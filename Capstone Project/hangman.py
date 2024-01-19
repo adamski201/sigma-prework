@@ -93,12 +93,12 @@ def handle_guess(curr_guess, answer, answer_line, guessed_chars, mistakes):
     guessed_chars.add(curr_guess)
 
     if is_correct_guess(curr_guess, answer):
-        curr_answer_line = update_answer_line(
+        answer_line = update_answer_line(
             curr_guess, answer, answer_line)
     else:
         mistakes += 1
 
-    return curr_guess, answer, answer_line
+    return answer_line, mistakes
 
 
 def generate_answer_line(answer) -> str:
