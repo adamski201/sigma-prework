@@ -2,144 +2,45 @@ import csv
 import random
 import time
 import os
-
-hangman_stages = [
-    '''
-   +---+
-   |   |
-       |
-       |
-       |
-       |
-=========
-''',
-    '''
-   +---+
-   |   |
-   O   |
-       |
-       |
-       |
-=========
-''',
-    '''
-   +---+
-   |   |
-   O   |
-   |   |
-       |
-       |
-=========
-''',
-    '''
-   +---+
-   |   |
-   O   |
-  /|   |
-       |
-       |
-=========
-''',
-    '''
-   +---+
-   |   |
-   O   |
-  /|\  |
-       |
-       |
-=========
-''',
-    '''
-   +---+
-   |   |
-   O   |
-  /|\  |
-  /    |
-       |
-=========
-''',
-    '''
-   +---+
-   |   |
-   O   |
-  /|\  |
-  / \  |
-       |
-=========
-'''
-]
-
-
-def get_formatted_hangman_from_mistakes(mistakes) -> str:
-    return hangman_stages[mistakes]
-
-
-def get_random_word_from_dictionary() -> str:
-    with open("words.txt", newline="") as words:
-        reader = csv.reader(words)
-
-        word_list = list(reader)[0]
-
-        random_idx = random.randint(0, len(word_list) - 1)
-
-        return word_list[random_idx]
-
-
-def generate_answer_line(answer) -> str:
-    return "_" * len(answer)
-
-
-def is_correct_guess(guess, answer) -> bool:
-    if guess in answer:
-        return True
-
-    return False
-
-
-def update_answer_line(guess, answer, answer_line):
-    answer_line_list = list(answer_line)
-
-    for idx, char in enumerate(answer):
-        if char == guess:
-            answer_line_list[idx] = char
-
-    return ''.join(answer_line_list)
-
-
-def is_valid_guess_input(input) -> bool:
-    return len(input) == 1 and input.isalpha()
-
-
-def is_unique_guess(curr_guess, guesses) -> bool:
-    return curr_guess not in guesses
+import hangman
 
 
 def clear_console() -> None:
     return os.system('clear')
 
 
-def main() -> None:
-    clear_console()
-
+def print_greeting() -> None:
     print("Welcome to Hangman!")
 
+    print("Guess the word by entering a single character, or try to guess the entire word itself!")
+
+
+def ask_for_guess() -> None:
+    return input("Enter a single character to make a guess: ").lower()
+
+
+def play_hangman():
+    clear_console()
+
+    print_greeting()
+
     input("Press Enter when you are ready to begin.")
-    # Add instructions here
     # Implement ability to type in full word instead of single character
-    # Add fail state
 
-    answer = get_random_word_from_dictionary()
+    answer = hangman.get_random_word_from_dictionary()
 
-    curr_answer_line = generate_answer_line(answer)
+    curr_answer_line = hangman.generate_answer_line(answer)
 
     mistakes = 0
 
     guessed_chars = set()
 
-    while True:
-        print(hangman_stages[mistakes])
+    print(answer)
 
-        if (mistakes == 6):
+    while True:
+        print(hangman.get_formatted_hangman_from_mistakes(mistakes))
+
+        if (hangman.is_out_of_lives(mistakes)):
             print("You lose...")
             break
 
@@ -147,15 +48,14 @@ def main() -> None:
 
         # Validate input
         while True:
-            curr_guess = input(
-                "Enter a single character to make a guess: ").lower()
+            curr_guess = ask_for_guess()
 
-            if not is_unique_guess(curr_guess, guessed_chars):
+            if not hangman.is_unique_guess(curr_guess, guessed_chars):
                 print("You have already guessed this character. Please try again.")
                 time.sleep(1)
                 continue
 
-            if not is_valid_guess_input(curr_guess):
+            if not hangman.is_valid_guess_input(curr_guess):
                 print("Input not recognised. Please try again.")
                 time.sleep(1)
                 continue
@@ -168,10 +68,10 @@ def main() -> None:
 
         guessed_chars.add(curr_guess)
 
-        if is_correct_guess(curr_guess, answer):
+        if hangman.is_correct_guess(curr_guess, answer):
             print("You guessed correctly!")
 
-            curr_answer_line = update_answer_line(
+            curr_answer_line = hangman.update_answer_line(
                 curr_guess, answer, curr_answer_line)
 
         else:
@@ -179,12 +79,25 @@ def main() -> None:
 
             mistakes += 1
 
-        time.sleep(2)
+        if hangman.is_won(curr_answer_line, answer):
+            time.sleep(0.5)
+            print("Well done, you've won!")
+            break
 
-        print("\n")
+        time.sleep(1.5)
+
         clear_console()
 
-    exit()
+    play_again_input = input("Would you like to play again? (y/n): ").lower()
+
+    if play_again_input == "y":
+        play_hangman()
+    else:
+        exit()
+
+
+def main() -> None:
+    play_hangman()
 
 
 if __name__ == '__main__':
