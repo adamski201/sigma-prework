@@ -71,6 +71,18 @@ hangman_stages = [
 MAX_MISTAKES = 6
 
 
+def setup():
+    answer = get_random_word_from_dictionary()
+
+    grid = generate_answer_line(answer)
+
+    mistakes = 0
+
+    guessed_chars = set()
+
+    return answer, grid, mistakes, guessed_chars
+
+
 def get_formatted_hangman_from_mistakes(mistakes) -> str:
     return hangman_stages[mistakes]
 
@@ -95,10 +107,10 @@ def handle_guess(curr_guess, answer, answer_line, guessed_chars, mistakes):
     if is_correct_guess(curr_guess, answer):
         answer_line = update_answer_line(
             curr_guess, answer, answer_line)
-    else:
-        mistakes += 1
 
-    return answer_line, mistakes
+        return answer_line, mistakes, True
+    else:
+        return answer_line, mistakes+1, False
 
 
 def generate_answer_line(answer) -> str:

@@ -41,24 +41,17 @@ def play_hangman():
     input("Press Enter when you are ready to begin.")
     # Implement ability to type in full word instead of single character
 
-    answer = hangman.get_random_word_from_dictionary()
-
-    curr_answer_line = hangman.generate_answer_line(answer)
-
-    mistakes = 0
-
-    guessed_chars = set()
-
-    print(answer)
+    answer, grid, mistakes, guessed_chars = hangman.setup()
 
     while True:
         print(hangman.get_formatted_hangman_from_mistakes(mistakes))
 
         if (hangman.is_out_of_lives(mistakes)):
             print("You lose...")
+
             break
 
-        print(f"Your current attempt: {curr_answer_line}")
+        print(f"Your current attempt: {grid}")
 
         curr_guess = ask_for_guess(guessed_chars)
 
@@ -66,22 +59,19 @@ def play_hangman():
 
         time.sleep(1)
 
-        guessed_chars.add(curr_guess)
+        grid, mistakes, is_correct = hangman.handle_guess(
+            curr_guess, answer, grid, guessed_chars, mistakes)
 
-        if hangman.is_correct_guess(curr_guess, answer):
+        if is_correct:
             print("You guessed correctly!")
-
-            curr_answer_line = hangman.update_answer_line(
-                curr_guess, answer, curr_answer_line)
-
         else:
             print("You guessed incorrectly... you lose a life!")
 
-            mistakes += 1
-
-        if hangman.is_won(curr_answer_line, answer):
+        if hangman.is_won(grid, answer):
             time.sleep(1.5)
+
             print("Well done, you've won!")
+
             break
 
         time.sleep(1.5)
